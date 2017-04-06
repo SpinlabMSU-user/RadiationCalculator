@@ -479,9 +479,9 @@ def manual_input():
     
     if raw_input('Any added mass? (yes, no): ').lower() in {'yes','y','ye'}:
         multiple_dates = True
-        print("Type 'n' to stop adding")
         while True:
             try:
+                print("Type 'n' to stop adding")
                 addition_time = float(raw_input('Addition time ({}): '.format(\
                 modify_t12)))
                 addition_activity = float(raw_input('Addition activity (mCi): '))
@@ -515,8 +515,9 @@ def data_input():
     else:
         raise Exception("You didn't input file or manual.")
     
-    plot_type = raw_input('log plot or linear? ').lower()
-    if plot_type != 'log' and plot_type != 'linear' and plot_type != 'lin':
+    plot_type = raw_input('semilog plot, loglog plot, or linear? ').lower()
+    if plot_type != 'semilog' and plot_type != 'linear' and\
+       plot_type != 'lin' and plot_type != 'log' and plot_type != 'loglog':
         raise Exception('{} is not an allowed plot type'.format(plot_type))
     
     return modify_t12, isotope, max_time, normalized_dates, initial_mass, multiple_dates,\
@@ -611,11 +612,19 @@ def create_plots(plot_type, solns, spec_names):
         for soln, name in zip(activity_solns, spec_names):
             axarr[1].plot(time, soln, label=name)
             
-    elif plot_type == 'log':
+    elif plot_type == 'loglog':
         for soln, name in zip(solns, spec_names):
             axarr[0].loglog(time, soln, label=name)
         for soln, name in zip(activity_solns, spec_names):
             axarr[1].loglog(time, soln, label=name)
+            
+    elif plot_type == 'semilog' or plot_type == 'log':
+        for soln, name in zip(solns, spec_names):
+            axarr[0].plot(time, soln, label=name)
+            axarr[0].set_yscale('log')
+        for soln, name in zip(activity_solns, spec_names):
+            axarr[1].plot(time, soln, label=name)
+            axarr[1].set_yscale('log')
     
     box = axarr[0].get_position()
     axarr[0].set_position([box.x0, box.y0, box.width * 0.9, box.height])     
@@ -2115,9 +2124,7 @@ def calc_radiation_energy_upper_limit(total_decay_solns, init_strings, joules = 
                 decay_type = iso_info[n][0]
                 decay_energy = total_decay * iso_info[n][2] * iso_info[n][4]
                 if decay_type == 'alpha':
-                    print(decay_energy)
                     decay_energy = decay_energy * ( (a-4.)/a ) 
-                    print(decay_energy)
                     #account for nucleus recoil
                 if init_energy == 0:
                     new_energy = decay_energy
